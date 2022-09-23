@@ -1,0 +1,4 @@
+[submodule "macos/scripts-common"]
+	path = macos/scripts-common
+	url = https://gitlab.com/bertrand-benoit/scripts-common.git
+	branch = stable

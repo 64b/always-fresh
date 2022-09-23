@@ -1,0 +1,6 @@
+#!/usr/local/bin/bash
+source ./_common
+function _check {
+  checkBin $1 || errorMessage "This tool requires <the_command>. Install it please, and then run this tool again."
+}
+_check $*

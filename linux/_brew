@@ -1,0 +1,31 @@
+#!/usr/local/bin/bash
+declare -r DIR=$(cd "$(dirname pwd)")   # r.o. variable works in zsh and bash
+declare -r dist="userland" # the type of distribution this is
+declare -r mode="baseline" # which components to install
+declare short_v="1.3"
+source ./_lib
+
+function brew_install {
+    msg_info "Installing brew for MacOS automatically"
+    mkdir homebrew && curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
+    eval "$(homebrew/bin/brew shellenv)"
+    brew update --force --quiet
+    chmod -R go-w "$(brew --prefix)/share/zsh"
+
+    msg_info "Do you wish to install the homebrew casks and fonts as well? (y or n)"
+    read answer
+    if [ "$answer" != "${answer#[Yy]}" ] ; then
+            echo "Attempting to install homebrew/cask(s)"
+            brew tap homebrew/cask 
+            brew tap homebrew/cask-versions 
+            brew tap homebrew/cask-drivers  
+            brew tap homebrew/cask-fonts 
+        else
+            echo "ok."
+    fi
+
+    msg_info "Successfully installed homebrew."
+    brew -v
+    msg_status "Testing Homebrew install" "PASSED"
+}
+brew_install $*

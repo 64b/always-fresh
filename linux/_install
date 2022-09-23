@@ -1,0 +1,18 @@
+#!/usr/local/bin/bash
+source ./_common
+source ./_lib
+function _install {
+checkBin $1 || errorMessage "This tool requires <the_command>. Install it please, and then run this tool again."
+ if [[ $? != 0 ]] ; then
+      if test "$arch" = "linux"; then
+         brew install $1 2> /dev/null
+      elif test "$arch" = "darwin"; then
+         brew install $1 2> /dev/null
+      elif test "$arch" = "windows"; then
+         scoop install $1 2> /dev/null
+      fi
+ else
+      msg_status "⦊ $1 dependency met." "PASSED"
+ fi
+}
+_install $*

@@ -1,0 +1,20 @@
+{
+  "name": "always-fresh",
+  "version": "1.0.0",
+  "description": "Binary always-fresh downloaders that are single-purpose binaries written in Bash using SHC to compile them.  They are great for moving binaries around as static assets and making sure they always stay current with zero dependencies.",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitub.com/64b/always-fresh"
+  },
+  "keywords": [
+    "always",
+    "fresh",
+    "binaries"
+  ],
+  "author": "Lynsei Asynynivynya",
+  "license": "MIT"
+}

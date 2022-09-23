@@ -1,0 +1,54 @@
+#!/usr/local/bin/bash
+
+
+if [ $1 == "-f" ]; then
+shift
+    echo "Forcing cache removal"
+    if [ -d "./lima" ]; then
+            echo "Clearing cached ./lima"
+            rm -rf $(pwd)/lima
+            echo "...done!"
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Clearing cached ./jq-osx-amd64 binary"
+            rm -f ./jq-osx-amd64
+        echo "Proceeding..."
+    fi
+
+    if [ -d "./lima" ]; then
+        echo "Remove the cached ./lima files? (y or n)"
+        echo "Note: you can execute this program by passing a -f flag to force this next time"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            echo "Clearing cached ./lima"
+            rm -rf $(pwd)/lima
+            echo "...done!"
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Remove the ./jq-osx-amd64 binary? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            rm -f ./jq-osx-amd64
+        fi
+    else
+        echo "Proceeding..."
+    fi
+    echo "Fetching JQ as a dependency and running it as a static binary..."
+    mkdir -p ./lima
+    curl -LO "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64"
+    sudo chmod +x jq-osx-amd64
+    VERSION=$(curl -fsSL https://api.github.com/repos/lima-vm/lima/releases/latest | ./jq-osx-amd64 -r .tag_name)
+    echo "Fetching Lima as a static binary for your specific architecture... $(uname -r)"
+    curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION:1}-$(uname -s)-$(uname -m).tar.gz" | tar Cxzvm ./lima/
+    chmod +x ./lima/bin/limactl
+    eval "./lima/bin/limactl $*"
+    echo "attempting to clean up the ./lima directory and removing JQ cached version"
+    rm -Rf ./lima
+    rm ./jq-osx-amd64
+    echo "... Finished! Goodbye!"

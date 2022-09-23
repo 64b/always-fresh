@@ -1,0 +1,54 @@
+#!/usr/local/bin/bash
+declare -r DIR=$(cd "$(dirname pwd)")   # r.o. variable works in zsh and bash
+declare -r dist="userland" # the type of distribution this is
+declare -r mode="baseline" # which components to install
+declare short_v="1.3"
+source ./_lib
+
+function brew_install {
+    msg_info "Installing brew for Linux automatically"
+     if test "$1" = "linux"; then
+             release=$(grep '^NAME.*.Ubuntu' /etc/os-release)
+
+      if [[ release =~ 'Name.*Ubuntu' ]] ; then 
+              echo "Ubuntu Release ---------------------------------------------------------------------------------"
+              sudo apt -y remove needrestart
+              DEBIAN_FRONTEND=noninteractive sudo apt-get update && \
+                    DEBIAN_FRONTEND=noninteractive sudo apt-get -q -y -o Dpkg::Use-Pty=0 install -y ruby dialog bash
+
+              export NONINTERACTIVE=TRUE
+              . ./brew
+              echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/ubuntu/.profile
+              eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+              test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)" 
+              test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" 
+              test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.bash_profile
+      else:
+             echo "Other Release (Yum/Centos/AML) ------------------------------------------------------------------"
+             sudo yum install -y ruby bash dialog
+              export NONINTERACTIVE=TRUE
+              . ./brew
+              echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/ubuntu/.profile
+              eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+              test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
+              test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+              test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.bash_profile
+      fi
+    fi
+    msg_info "Do you wish to install the homebrew casks and fonts as well? (y or n)"
+    read answer
+    if [ "$answer" != "${answer#[Yy]}" ] ; then
+            echo "Attempting to install homebrew/cask(s)"
+            brew tap homebrew/cask 
+            brew tap homebrew/cask-versions 
+            brew tap homebrew/cask-drivers  
+            brew tap homebrew/cask-fonts 
+        else
+            echo "ok."
+    fi
+
+    msg_info "Successfully installed homebrew."
+    brew -v
+    msg_status "Testing Homebrew install" "PASSED"
+}
+brew_install $*

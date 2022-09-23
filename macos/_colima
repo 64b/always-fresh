@@ -1,0 +1,61 @@
+#!/usr/local/bin/bash
+
+if [[ $1 -eq '-f' ]]; then
+    shift
+    echo "Forcing cache removal"
+    if [ -d "./colima" ]; then
+            echo "Clearing cached ./colima"
+            rm -f $(pwd)/colima/bin-colima
+            rmdir $(pwd)/colima
+            echo "...done!"
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Clearing cached ./jq-osx-amd64 binary"
+            rm -f ./jq-osx-amd64
+        echo "Proceeding..."
+    fi
+
+    if [ -d "./colima" ]; then
+        echo "Remove the ./colima files? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            echo "Attempting to remove ./colima"
+            rm -f $(pwd)/colima/bin-colima
+            rmdir $(pwd)/colima
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Remove the ./jq-osx-amd64 binary? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            rm -f ./jq-osx-amd64
+        fi
+    else
+        echo "Proceeding..."
+    fi
+    mkdir -p ./colima
+    curl -LO "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64"
+    sudo chmod +x jq-osx-amd64
+    sudo chmod 0777 jq-osx-amd64
+    if [[ $(uname -m) == 'arm64' ]]; then
+        echo "Fetching Colima for an M1 Mac..."
+        VERSION=$(curl -fsSL https://api.github.com/repos/abiosoft/colima/releases/latest | ./jq-osx-amd64 -r .tag_name)
+        echo "https://github.com/abiosoft/colima/releases/download/${VERSION}/colima-$(uname -s)-$(uname -m)" 
+        curl -L "https://github.com/abiosoft/colima/releases/download/${VERSION}/colima-$(uname -s)-$(uname -m)" -o ./colima/bin-colima
+    else
+        echo "Fetching Colima for an Intel Mac..."
+        VERSION=$(curl -fsSL https://api.github.com/repos/abiosoft/colima/releases/latest | ./jq-osx-amd64 -r .tag_name)
+        echo "https://github.com/abiosoft/colima/releases/download/${VERSION}/colima-$(uname -s)-$(uname -m)" 
+        curl -L "https://github.com/abiosoft/colima/releases/download/${VERSION}/colima-$(uname -s)-$(uname -m)" -o ./colima/bin-colima
+    fi
+
+    chmod +x ./colima/bin-colima
+    eval "./colima/bin-colima $*"
+    echo "attempting to remove files from ./colima cached directory"
+    rm -Rf ./colima 
+    echo "Finished, Goodbye!"

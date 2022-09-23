@@ -1,0 +1,65 @@
+#!/usr/local/bin/bash
+bash "./get-brew"
+if [[ $1 -eq '-f' ]]; then
+    echo "Forcing cache removal"
+    if [ -d "./shc" ]; then
+            echo "Clearing cached ./shc"
+            rm -f $(pwd)/shc
+            rmdir $(pwd)/shc
+            echo "...done!"
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Clearing cached ./jq-osx-amd64 binary"
+            rm -f ./jq-osx-amd64
+        echo "Proceeding..."
+    fi
+
+    if [ -d "./shc" ]; then
+        echo "Remove the ./shc files? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            echo "Attempting to remove ./shc"
+             VERSION=$(curl -fsSL https://api.github.com/repos/neurobin/shc/releases/latest | ./jq-osx-amd64 -r .tag_name)
+            rm -Rf $(pwd)/shc-${VERSION}
+            rmdir $(pwd)/shc
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Remove the ./jq-osx-amd64 binary? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            rm -f ./jq-osx-amd64
+        fi
+    else
+        echo "Proceeding..."
+    fi
+    mkdir -p ./shc
+    curl -LO "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64"
+    sudo chmod +x jq-osx-amd64
+    sudo chmod 0777 jq-osx-amd64
+    VERSION=$(curl -fsSL https://api.github.com/repos/neurobin/shc/releases/latest | ./jq-osx-amd64 -r .tag_name)
+    echo "https://github.com/neurobin/shc/releases/download/${VERSION}/${VERSION}.tar.gz"
+    curl -L "https://github.com/neurobin/shc/archive/refs/tags/${VERSION}.tar.gz" -o ./shc.tar.gz 
+    tar xvfz shc.tar.gz
+    cd shc-${VERSION}
+    ./configure
+    make
+    sudo make install
+    cd ../
+    # gxx is a silent and deadly requirement of SHC on most OS
+    brew install gcc
+    /usr/local/bin/shc $*
+
+    echo "attempting to remove files from ./shc cached directory"
+    rm -Rf ./shc-${VERSION}
+    echo "Removing SHC Binary"
+    sudo rm -f /usr/local/bin/shc
+    echo "Removing JQ and Homebrew sources"
+    rm ./jq*
+    rm -Rf ./homebrew*
+    rm -Rf shc*

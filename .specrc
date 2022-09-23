@@ -1,0 +1,21 @@
+# kubernetes default specification
+apiVersion: apps/v1beta1
+kind: mplt-runtimeK8s-edgeDeployVia-pm2-continaer-dot-ts
+metadata:
+  name: nfomtx-recmpens.repompulate.asBinary
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels: # labels to select/identify the deployment
+        app: repompulate-deno
+    spec:     # pod spec                  
+      containers: 
+      - name: deno-template-repository
+        image: opensourced/selfvalidation:1.2.1
+        ports:
+        - containerPort: 3000
+      env:
+        - SECRET_BROKER: "follow_get ${CRYPTOMINT}"
+        - SECRET_INIT: "chmod +x init.sh; nodocker run -d buildkit-nodocker:1.1.0 --command \"limactl shell nodocker built --local -o . .\""
+        - COMMAND: "chmod +x release-bin/amd64linux && ./release-bin/amd64linux"

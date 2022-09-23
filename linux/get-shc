@@ -1,0 +1,52 @@
+#!/usr/local/bin/bash
+
+if [[ $1 -eq '-f' ]]; then
+    shift
+    echo "Forcing cache removal"
+    if [ -d "./shc" ]; then
+            echo "Clearing cached ./shc"
+            rm -f $(pwd)/shc/bin-shc
+            rmdir $(pwd)/shc
+            echo "...done!"
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Clearing cached ./jq-osx-amd64 binary"
+            rm -f ./jq-osx-amd64
+        echo "Proceeding..."
+    fi
+
+    if [ -d "./shc" ]; then
+        echo "Remove the ./shc files? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            echo "Attempting to remove ./shc"
+            rm -f $(pwd)/shc/bin-shc
+            rmdir $(pwd)/shc
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Remove the ./jq-osx-amd64 binary? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            rm -f ./jq-osx-amd64
+        fi
+    else
+        echo "Proceeding..."
+    fi
+    mkdir -p ./shc
+    curl -LO "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64"
+    sudo chmod +x jq-osx-amd64
+    sudo chmod 0777 jq-osx-amd64
+    VERSION=$(curl -fsSL https://api.github.com/repos/neurobin/shc/releases/latest | ./jq-osx-amd64 -r .tag_name)
+    echo "https://github.com/neurobin/shc/releases/download/${VERSION}/${VERSION}.tar.gz
+    curl -L "https://github.com/neurobin/shc/releases/download/${VERSION}/${VERSION}.tar.gz" -o ./shc/bin-shc
+    chmod +x ./shc/bin-shc
+    eval "./shc/bin-shc $*"
+    echo "attempting to remove files from ./shc cached directory"
+    rm -Rf ./shc 
+    echo "Finished, Goodbye!"

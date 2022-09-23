@@ -1,0 +1,125 @@
+  apiVersion: spys.ai/zeroNineAlpha
+  stackSpecification: stack-kind
+
+  metadata:
+    name: stackopsapp
+    region: us-east-1
+
+  managedNodeGroups:
+    - name: lynsei-generic-cloud-formation-lte
+      instanceType: mac1.metal
+      desiredCapacity: 4
+      volumeSize: 20
+      minSize: 4
+      maxSize: 10
+      securityGroups:
+        attachIDs: 
+          - sg-${SECURE_GROUP}
+      availabilityZones:
+        - ${PRIMARY_REGION_AB}
+        - ${PRIMARY_REGION_AD}
+      ssh:
+        publicKey: `curl -FO --silent ${CRYPTPOMINT}`
+      tags: 
+        env: production
+        profile: fargate
+        namespace: any
+      iam:
+        withAddonPolicies:
+          autoScaler: true
+          certManager: true
+          ebs: true
+          cloudWatch: true
+          externalDNS: true
+
+  fargateProfiles:
+    - name: stackops-dev
+      selectors:
+        # All workloads in the "dev" Kubernetes namespace matching the following
+        # label selectors will be scheduled onto Fargate:
+        - namespace: stackops-dev
+          labels:
+            env: dev
+            checks: #
+
+  language:
+    backend: node.js-v12.14.1
+    middleware: node.js-v12.14.1
+    frontend: es2020
+  cloud-storage:
+    block:
+      aws: ebs
+      gcp: cbs
+      azure: abs
+    ssd:
+      aws: cost-prohibitive
+      gcp: gce-ssd
+      azure: cost-prohibitive
+    nvme:
+      aws: cost-prohibitive
+      gcp: nvme
+      azure: cost-prohibitive
+  cloud-database:
+    aws:
+      - none
+    gcp:
+      - none
+    azure:
+      - none
+  rds-database:
+    aurora:
+    - DB_INSTANCE=${AES512_SECRET_K8S_SECRET_SAUCE}
+    - DH_USER=${AES512_SECRET_K8S_POSTGRE_USER}
+    - DB_PASS=${AES512_SECRET_K8S_POSTGRE_PASS}
+    - DB_NAME=${AES512_SECRET_K8S_POSTGRE_DBNAME}
+    - DB_URL=${AES512_SECRET_K8S_POSTGRE_URL}
+  middleware:
+    logging:
+      - graylog=NULL
+    tracing:
+      - sentry=NULL
+    auth:
+      - passport=NULL
+  frameworks-ui:
+    framework:
+    - vue3
+    components:
+    - vuetify
+  frameworks-fullstack:
+    - vue=vuetify-vue3
+    - compents=naive-ui-nalxon
+    - redux=no
+    - state=finite-state-machine-mgmt
+    - svc=https://chateau.lyns.local/m:9235/api
+  integrations-marketing:
+    email:
+    - sendinblue
+    - engine=dxpv1-prod
+    voice-ivr:
+    - enabled.twilio-ivr
+    certbot:
+    - kinesis.stillwater
+    - builtkite.aws1.dns.lynsei.com
+    intelligence:
+    - spokeo
+    - crunchbase
+    - salesql
+    - zoominfo
+    sns:
+    - aws-sns
+    - sns-vscode
+    - botframe1
+    customAI:
+    - botkit
+    - relay-plugin.slack.stackops
+  developer-tools:
+    api-generators:
+  #  - prisma
+  #  - graphql-tools
+    - hasura
+    - rust-api
+    - pgrest
+    - pgadmin
+    - inversify
+    - tsapi
+    - mikrorm

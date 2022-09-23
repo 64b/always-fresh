@@ -1,0 +1,12 @@
+# FPIQ:  Forward Positioned Inverse Queues
+#
+# These are queue mechanisms that accept connections only from their rear-positioned 
+# worker nodes that are authenticated with GPG Signature mounted via docker secrets.
+
+# Why should you care?
+# - It is a way to serve data from a remote location without ever giving the location away.
+# - The workers can relay information from a chain of requests that is near-impossible to breach or reverse engineer.
+
+# this denotes the fingerprint of the FPIQ you wish to have workers accept requests from.
+fpiq_queue=80:as8:0sdfa:ag0:as9:0ll:01k
+
