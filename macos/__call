@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [[ $1  ]] ; then
+case $1 in
+  _brew) source "./_brew";;
+  _lima) source "./_lima";;
+  _colima) source "./_colima";;
+  _shc) source "./_shc";;
+  _check) source "./_check";;
+  _nerdctl) source "./_nerdctl";;
+  _docker) source "./_docker";;
+  _slirp) source "./_slirp";;
+  _rootless) source "./_rootless";;
+  *) echo "Please specify an action using a prefix, such as an underscore for binaries: i.e.- \"_rootless\"";; 
+esac
+else
+  source "_lib"
+  source "_common"
+fi

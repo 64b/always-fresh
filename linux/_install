@@ -1,18 +1,17 @@
 #!/usr/local/bin/bash
-source ./_common
 source ./_lib
+source ./_common
 function _install {
-checkBin $1 || errorMessage "This tool requires <the_command>. Install it please, and then run this tool again."
- if [[ $? != 0 ]] ; then
-      if test "$arch" = "linux"; then
-         brew install $1 2> /dev/null
-      elif test "$arch" = "darwin"; then
-         brew install $1 2> /dev/null
-      elif test "$arch" = "windows"; then
+ if [[ $1 ]] ; then
+     if test "$(uname -s)" = "Linux"; then
+         `./homebrew/bin/brew install $1 `
+     elif test "$(uname -s)" = "Darwin"; then
+         `./homebrew/bin/brew install $1 `
+     else
          scoop install $1 2> /dev/null
-      fi
+     fi
  else
-      msg_status "⦊ $1 dependency met." "PASSED"
+      msg_status "⦊ You must pass something to install via brew i.e.- docker." "FAILED"
  fi
 }
-_install $*
+_install $1

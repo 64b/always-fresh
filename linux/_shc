@@ -1,10 +1,11 @@
 #!/usr/local/bin/bash
-bash "./get-brew"
-if [[ $1 -eq '-f' ]]; then
+
+if [[ $1 == '-f' ]]; then
+    shift
     echo "Forcing cache removal"
     if [ -d "./shc" ]; then
             echo "Clearing cached ./shc"
-            rm -f $(pwd)/shc
+            rm -f $(pwd)/shc/bin-shc
             rmdir $(pwd)/shc
             echo "...done!"
         else
@@ -22,8 +23,7 @@ if [[ $1 -eq '-f' ]]; then
         read answer
         if [ "$answer" != "${answer#[Yy]}" ] ; then
             echo "Attempting to remove ./shc"
-             VERSION=$(curl -fsSL https://api.github.com/repos/neurobin/shc/releases/latest | ./jq-osx-amd64 -r .tag_name)
-            rm -Rf $(pwd)/shc-${VERSION}
+            rm -f $(pwd)/shc/bin-shc
             rmdir $(pwd)/shc
         else
             echo "Filesystem ok..."
@@ -42,24 +42,20 @@ if [[ $1 -eq '-f' ]]; then
     curl -LO "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64"
     sudo chmod +x jq-osx-amd64
     sudo chmod 0777 jq-osx-amd64
-    VERSION=$(curl -fsSL https://api.github.com/repos/neurobin/shc/releases/latest | ./jq-osx-amd64 -r .tag_name)
-    echo "https://github.com/neurobin/shc/releases/download/${VERSION}/${VERSION}.tar.gz"
-    curl -L "https://github.com/neurobin/shc/archive/refs/tags/${VERSION}.tar.gz" -o ./shc.tar.gz 
-    tar xvfz shc.tar.gz
-    cd shc-${VERSION}
-    ./configure
-    make
-    sudo make install
-    cd ../
-    # gxx is a silent and deadly requirement of SHC on most OS
-    brew install gcc
-    /usr/local/bin/shc $*
-
-    echo "attempting to remove files from ./shc cached directory"
-    rm -Rf ./shc-${VERSION}
-    echo "Removing SHC Binary"
-    sudo rm -f /usr/local/bin/shc
-    echo "Removing JQ and Homebrew sources"
-    rm ./jq*
-    rm -Rf ./homebrew*
-    rm -Rf shc*
+    BIN_VERSION=$(curl -fsSL https://api.github.com/repos/neurobin/shc/releases/latest | ./jq-osx-amd64 -r .tag_name)
+    echo "https://github.com/neurobin/shc/archive/refs/tags/${BIN_VERSION:-"4.0.3"}.tar.gz"
+    curl -L "https://github.com/neurobin/shc/archive/refs/tags/${BIN_VERSION:-"4.0.3"}.tar.gz" -o ./shc-${BIN_VERSION:-"4.0.3"}.tar.gz
+    tar -xvf ./shc-${BIN_VERSION:-"4.0.3"}.tar.gz
+    eval "./_brew"
+    pushd .
+    ./_brew install gcc bazel
+    cd ./shc-${BIN_VERSION:-\"4.0.3\"}
+    ./configure --bindir=$(pwd) 
+    make install
+    cp shc ../shx
+    popd
+    eval "./shc $*"
+    echo "attempting to remove files from cached directory"
+    rm -rf ./shc
+    rm -rf ./shc-${BIN_VERSION:-"4.0.3"} 
+    echo "Finished, Goodbye!"

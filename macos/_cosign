@@ -1,0 +1,54 @@
+#!/usr/local/bin/bash
+
+
+if [[ $1 -eq "-f" ]]; then
+shift
+    echo "Forcing cache removal"
+    if [ -d "./cosign" ]; then
+            echo "Clearing cached ./cosign"
+            rm -rf $(pwd)/cosign
+            echo "...done!"
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Clearing cached ./jq-osx-amd64 binary"
+            rm -f ./jq-osx-amd64
+        echo "Proceeding..."
+    fi
+
+    if [ -d "./cosign" ]; then
+        echo "Remove the cached ./cosign files? (y or n)"
+        echo "Note: you can execute this program by passing a -f flag to force this next time"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            echo "Clearing cached ./cosign"
+            rm -rf $(pwd)/cosign
+            echo "...done!"
+        else
+            echo "Filesystem ok..."
+        fi
+    fi
+    if [ -r "./jq-osx-amd64" ]; then
+        echo "Remove the ./jq-osx-amd64 binary? (y or n)"
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ] ; then
+            rm -f ./jq-osx-amd64
+        fi
+    else
+        echo "Proceeding..."
+    fi
+
+    if [[ $(uname -m) == 'arm64' ]]; then
+        curl -L "https://github.com/sigstore/cosign/releases/download/${VERSION:-"v1.12.1"}/cosign-darwin-arm64" -o ./cosign/cosign
+    else
+        curl -L "https://github.com/sigstore/cosign/releases/download/${VERSION:-"v1.12.1"}/cosign-darwin-amd64" -o ./cosign/cosign
+    fi
+    echo "https://github.com/sigstore/cosign/releases/download/${VERSION:-"v1.12.1"}/cosign-$(uname -s)-$(uname -m)" 
+    chmod +x ./cosign/cosign
+    eval "./cosign/cosign $*"
+    echo "attempting to clean up the ./cosign directory and removing JQ cached version"
+    #rm -Rf ./cosign
+    #rm ./jq-osx-amd64
+    echo "... Finished! Goodbye!"

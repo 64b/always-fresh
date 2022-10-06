@@ -1,7 +1,7 @@
 #!/usr/local/bin/bash
 
-git submodule add -b stable https://gitlab.com/bertrand-benoit/scripts-common.git
-git submodule update --remote
+git submodule add -b stable https://gitlab.com/bertrand-benoit/scripts-common.git 2&>1 /dev/null
+git submodule update --remote 2&>1 /dev/null
 
 currentDir=$( dirname "$( command -v "$0" )" )
 scriptsCommonUtilities="$currentDir/scripts-common/utilities.sh"
